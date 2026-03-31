@@ -3,26 +3,15 @@
   "id": "packetevents",
   "version": "${version}",
   "name": "PacketEvents",
-  "description": "",
+  "description": "A protocol library for Minecraft, supporting multi-version Fabric via chain loading.",
   "authors": [
-    "retrooper"
+    "retrooper",
+    "Axionize"
   ],
   "contact": {},
   "license": "GPL-3.0",
   "icon": "assets/packetevents/icon.png",
   "environment": "*",
-  "entrypoints": {
-    "preLaunch": [
-      "io.github.retrooper.packetevents.PacketEventsMod"
-    ],
-    "main": [
-      "io.github.retrooper.packetevents.PacketEventsMod"
-    ]
-  },
-  "mixins": [
-    "packetevents.mixins.json"
-  ],
-  "accessWidener": "packetevents.accesswidener",
   "depends": {
     "fabricloader": "*"
   }
