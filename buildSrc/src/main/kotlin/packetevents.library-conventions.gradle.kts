@@ -31,7 +31,9 @@ if (envFile.exists()) envFile.reader(Charsets.UTF_8).use { reader ->
 }
 
 fun getEnvVar(name: String): String? {
-    return System.getenv(name) ?: envProperties.getProperty(name)
+    val value = System.getenv(name) ?: envProperties.getProperty(name)
+    // CI may define vars as empty strings; treat blank as missing.
+    return value?.trim()?.takeIf { it.isNotEmpty() }
 }
 
 fun getCurrentGitBranchName(): String {
