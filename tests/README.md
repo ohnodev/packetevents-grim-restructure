@@ -83,7 +83,7 @@ Requires Java 25 runtime for server launch:
   - Supports case profiles:
     - `intermediary-1194`: main + common + intermediary + `mc1140` + `mc1194`
     - `intermediary-1216`: main + common + intermediary + `mc1140` + `mc1194` + `mc1202` + `mc1211` + `mc1215` + `mc1216`
-    - `official-261`: common + official
+    - `official-261`: common + official + main `packetevents-fabric-*.jar` artifact (as installed by `install-packetevents-dev-jars.sh`)
 
 - `tests/scripts/run-server.sh`
   - Runs the server with `nogui` and optional `--java-bin` override.

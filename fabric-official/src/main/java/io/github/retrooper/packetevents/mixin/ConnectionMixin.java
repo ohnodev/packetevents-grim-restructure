@@ -86,6 +86,6 @@ public class ConnectionMixin {
             }
         }
         channel.closeFuture().addListener((ChannelFutureListener) future ->
-                PacketEventsImplHelper.handleDisconnection(user.getChannel(), user.getUUID()));
+                PacketEventsImplHelper.handleDisconnection(channel, user.getUUID()));
     }
 }

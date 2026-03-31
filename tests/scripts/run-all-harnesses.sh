@@ -4,8 +4,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 JAVA25_BIN="${JAVA25_BIN:-/root/.gradle/jdks/eclipse_adoptium-25-amd64-linux.2/bin/java}"
+TIMEOUT_CMD=""
 
 cd "${REPO_ROOT}"
+
+if command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_CMD="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_CMD="gtimeout"
+else
+  echo "[all] Missing timeout utility. Install GNU coreutils (gtimeout) or GNU timeout." >&2
+  exit 1
+fi
 
 smoke_start() {
   local case_name="$1"
@@ -14,7 +24,7 @@ smoke_start() {
   log_file="$(mktemp)"
 
   set +e
-  timeout 45s "$@" > >(tee "${log_file}") 2>&1
+  "${TIMEOUT_CMD}" 45s "$@" > >(tee "${log_file}") 2>&1
   local rc=$?
   set -e
 

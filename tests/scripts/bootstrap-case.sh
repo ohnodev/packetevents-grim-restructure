@@ -52,7 +52,9 @@ case "${PROFILE}" in
     ./gradlew :fabric:build :fabric-official:build
     ;;
   *)
-    ./gradlew :fabric:build
+    echo "[bootstrap:${CASE_NAME}] Unknown profile: ${PROFILE}" >&2
+    echo "[bootstrap:${CASE_NAME}] Expected one of: intermediary-1194, intermediary-1216, official-261" >&2
+    exit 1
     ;;
 esac
 

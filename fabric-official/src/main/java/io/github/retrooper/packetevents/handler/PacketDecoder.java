@@ -54,8 +54,4 @@ public class PacketDecoder extends MessageToMessageDecoder<ByteBuf> implements P
         }
     }
 
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        super.userEventTriggered(ctx, evt);
-    }
 }

@@ -29,8 +29,12 @@ SERVER_JAR="${TARGET_DIR}/fabric-server-launch.jar"
 
 if [[ ! -f "${SERVER_JAR}" ]]; then
   echo "Missing ${SERVER_JAR}"
-  echo "Run bootstrap first:"
+  echo "Run a matching bootstrap first for this server directory."
+  echo "Examples:"
   echo "  ./tests/scripts/bootstrap-intermediary.sh"
+  echo "  ./tests/scripts/bootstrap-intermediary-1194.sh"
+  echo "  ./tests/scripts/bootstrap-intermediary-1216.sh"
+  echo "  ./tests/scripts/bootstrap-official-261.sh"
   exit 1
 fi
 

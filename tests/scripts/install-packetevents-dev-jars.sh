@@ -62,6 +62,11 @@ latest_jar() {
   local file
   for file in "${matches[@]}"; do
     [[ -e "${file}" ]] || continue
+    local base
+    base="$(basename "${file}")"
+    if [[ "${base}" == *-sources.jar || "${base}" == *-javadoc.jar ]]; then
+      continue
+    fi
     if [[ -z "${newest}" || "${file}" -nt "${newest}" ]]; then
       newest="${file}"
     fi
@@ -77,7 +82,7 @@ copy_latest_by_pattern() {
   local label="${2:-${pattern}}"
   local required="${3:-0}"
   local selected
-  selected="$(latest_jar "${pattern}" | awk '!/javadoc|sources/' | head -n 1 || true)"
+  selected="$(latest_jar "${pattern}" || true)"
   if [[ -z "${selected}" ]]; then
     if [[ "${required}" == "1" ]]; then
       echo "[install] Missing required jar: ${label} (pattern: ${pattern})" >&2
@@ -119,7 +124,7 @@ copy_main_fabric_jar() {
 copy_latest_mc_module() {
   local module="$1"
   local selected
-  selected="$(latest_jar "packetevents-fabric-${module}-*.jar" | awk '!/javadoc|sources/' | head -n 1 || true)"
+  selected="$(latest_jar "packetevents-fabric-${module}-*.jar" || true)"
   if [[ -z "${selected}" ]]; then
     echo "[install] Missing module jar for ${module}" >&2
     return 1
