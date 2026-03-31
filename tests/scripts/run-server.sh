@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SERVER_DIR="tests/runs/fabric-1.21.1"
+JAVA_BIN="java"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -9,9 +10,13 @@ while [[ $# -gt 0 ]]; do
       SERVER_DIR="${2:?missing value for --server-dir}"
       shift 2
       ;;
+    --java-bin)
+      JAVA_BIN="${2:?missing value for --java-bin}"
+      shift 2
+      ;;
     *)
       echo "Unknown arg: $1"
-      echo "Usage: $0 [--server-dir tests/runs/fabric-1.21.1]"
+      echo "Usage: $0 [--server-dir tests/runs/fabric-1.21.1] [--java-bin /path/to/java]"
       exit 1
       ;;
   esac
@@ -30,4 +35,4 @@ if [[ ! -f "${SERVER_JAR}" ]]; then
 fi
 
 cd "${TARGET_DIR}"
-exec java -Xms1G -Xmx2G -jar fabric-server-launch.jar nogui
+exec "${JAVA_BIN}" -Xms1G -Xmx2G -jar fabric-server-launch.jar nogui
