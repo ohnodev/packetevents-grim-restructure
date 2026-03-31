@@ -12,10 +12,4 @@ dependencies {
 
 loom {
     splitEnvironmentSourceSets()
-    mods {
-        register("packetevents-${project.name}") {
-            sourceSet(sourceSets.main.get())
-            sourceSet(sourceSets.maybeCreate("client"))
-        }
-    }
 }

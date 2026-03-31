@@ -123,9 +123,7 @@ public class PacketEncoder extends ChannelOutboundHandlerAdapter implements Pack
                 } catch (Exception ignored) {}
                 ctx.channel().close();
                 if (player instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.getServer().execute(() -> {
-                        FabricPacketEventsAPI.getServerAPI().getPlayerManager().disconnectPlayer(serverPlayer, "Invalid packet");
-                    });
+                    FabricPacketEventsAPI.getServerAPI().getPlayerManager().disconnectPlayer(serverPlayer, "Invalid packet");
                 }
             }
         }

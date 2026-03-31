@@ -14,11 +14,3 @@ dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings("net.fabricmc:yarn:$yarn_mappings")
 }
-
-loom {
-    mods {
-        register("packetevents-${project.name}") {
-            sourceSet(sourceSets.main.get())
-        }
-    }
-}
