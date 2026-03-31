@@ -12,7 +12,7 @@ dependencies {
     api(project(":fabric-common"))
 
     minecraft(libs.fabric.minecraft.official)
-    modImplementation(libs.fabric.loader)
+    compileOnly(libs.fabric.loader)
     compileOnly(libs.via.version)
 }
 
