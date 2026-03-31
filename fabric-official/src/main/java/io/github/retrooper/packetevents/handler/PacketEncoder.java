@@ -16,7 +16,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDi
 import io.github.retrooper.packetevents.factory.fabric.FabricPacketEventsAPI;
 import io.github.retrooper.packetevents.util.viaversion.ViaVersionUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -24,7 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-@ApiStatus.Internal @ChannelHandler.Sharable
+@ApiStatus.Internal
 public class PacketEncoder extends ChannelOutboundHandlerAdapter implements PacketEventsChannelHandler {
 
     private static final boolean NETTY_4_1_0;

@@ -53,6 +53,7 @@ public class PacketEventsMod implements PreLaunchEntrypoint, ModInitializer {
                 List<ChainLoadEntryPoint> clientChainLoadEntryPoints = loader.getEntrypoints(clientChainLoadEntryPointName, ChainLoadEntryPoint.class);
                 clientChainLoadEntryPoints.sort((a, b) -> b.getNativeVersion().getProtocolVersion() - a.getNativeVersion().getProtocolVersion());
                 clientChainLoadEntryPoints.addAll(mainChainLoadEntryPoints);
+                clientChainLoadEntryPoints.sort((a, b) -> b.getNativeVersion().getProtocolVersion() - a.getNativeVersion().getProtocolVersion());
                 allEntryPoints = clientChainLoadEntryPoints;
             }
             case SERVER -> {

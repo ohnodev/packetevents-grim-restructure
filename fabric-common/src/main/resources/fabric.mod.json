@@ -21,6 +21,6 @@
     ]
   },
   "depends": {
-    "fabricloader": "*"
+    "fabricloader": ">=0.14.0"
   }
 }

@@ -34,7 +34,7 @@ loom {
     }
 
     accessWidenerPath = sourceSets.main.get().resources.srcDirs.single()
-        .resolve("${rootProject.name}.accesswidener")
+        .resolve("packetevents.accesswidener")
 }
 
 java {

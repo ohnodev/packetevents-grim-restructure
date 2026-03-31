@@ -12,7 +12,9 @@ dependencies {
     include(project(":netty-common"))
 
     include(project(":fabric-common"))
-    include(project(":fabric-official"))
+    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25)) {
+        include(project(":fabric-official"))
+    }
     include(project(":fabric-intermediary"))
 
     minecraft(libs.fabric.minecraft.official)

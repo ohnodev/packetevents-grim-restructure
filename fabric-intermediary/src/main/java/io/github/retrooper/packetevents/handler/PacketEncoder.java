@@ -34,7 +34,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDi
 import io.github.retrooper.packetevents.factory.fabric.FabricPacketEventsAPI;
 import io.github.retrooper.packetevents.util.viaversion.ViaVersionUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -42,7 +41,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-@ApiStatus.Internal @ChannelHandler.Sharable
+@ApiStatus.Internal
 public class PacketEncoder extends ChannelOutboundHandlerAdapter implements PacketEventsChannelHandler {
 
     private static final boolean NETTY_4_1_0;
@@ -67,6 +66,10 @@ public class PacketEncoder extends ChannelOutboundHandlerAdapter implements Pack
         this.side = side;
         this.user = user;
         this.preViaVersion = preViaVersion;
+    }
+
+    public PacketEncoder(PacketSide side, User user) {
+        this(side, user, false);
     }
 
     @Override
@@ -102,8 +105,10 @@ public class PacketEncoder extends ChannelOutboundHandlerAdapter implements Pack
     }
 
     private @Nullable ProtocolPacketEvent handlePacket(ChannelHandlerContext ctx, ByteBuf buffer, ChannelPromise promise) throws Exception {
-        if (!preViaVersion && PacketEvents.getAPI().getSettings().isPreViaInjection() && !ViaVersionUtil.isAvailable(user))
+        if (!preViaVersion && PacketEvents.getAPI().getSettings().isPreViaInjection() && !ViaVersionUtil.isAvailable(user)) {
+            // Intentionally ignore the pre-Via return; the authoritative event is produced by the main pass below.
             PacketEventsImplHelper.handlePacket(ctx.channel(), user, player, buffer, preViaVersion, this.side);
+        }
 
         ProtocolPacketEvent protocolPacketEvent = PacketEventsImplHelper.handlePacket(
                 ctx.channel(), this.user, this.player, buffer, !preViaVersion, this.side
@@ -137,9 +142,13 @@ public class PacketEncoder extends ChannelOutboundHandlerAdapter implements Pack
                 } catch (Exception ignored) {}
                 ctx.channel().close();
                 if (player instanceof ServerPlayerEntity serverPlayer) {
-                    serverPlayer.getServer().execute(() -> {
+                    var server = serverPlayer.getServer();
+                    if (server != null) {
+                        server.execute(() ->
+                                FabricPacketEventsAPI.getServerAPI().getPlayerManager().disconnectPlayer(serverPlayer, "Invalid packet"));
+                    } else {
                         FabricPacketEventsAPI.getServerAPI().getPlayerManager().disconnectPlayer(serverPlayer, "Invalid packet");
-                    });
+                    }
                 }
             }
         }

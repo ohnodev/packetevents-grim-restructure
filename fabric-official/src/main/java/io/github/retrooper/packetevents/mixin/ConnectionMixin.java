@@ -1,6 +1,7 @@
 package io.github.retrooper.packetevents.mixin;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.github.retrooper.packetevents.event.UserConnectEvent;
 import com.github.retrooper.packetevents.protocol.ConnectionState;
 import com.github.retrooper.packetevents.protocol.PacketSide;
@@ -39,26 +40,33 @@ public class ConnectionMixin {
             ChannelPipeline pipeline, PacketFlow flow, boolean memoryOnly,
             BandwidthDebugMonitor bandwidthDebugMonitor, CallbackInfo ci
     ) {
+        PacketEventsAPI<?> api = PacketEvents.getAPI();
         if (!FabricUtil.isOurConnection(flow)) {
-            PacketEvents.getAPI().getLogManager().debug("Skipped pipeline injection on " + flow);
+            if (api != null) {
+                api.getLogManager().debug("Skipped pipeline injection on " + flow);
+            }
             return;
         }
 
-        PacketEvents.getAPI().getLogManager().debug("Game connected!");
+        if (api == null) {
+            return;
+        }
+        api.getLogManager().debug("Game connected!");
 
         Channel channel = pipeline.channel();
         User user = new User(channel, ConnectionState.HANDSHAKING,
                 CLIENT_VERSION, new UserProfile(null, null));
-        PacketEvents.getAPI().getProtocolManager().setUser(channel, user);
+        api.getProtocolManager().setUser(channel, user);
 
         UserConnectEvent connectEvent = new UserConnectEvent(user);
-        PacketEvents.getAPI().getEventManager().callEvent(connectEvent);
+        api.getEventManager().callEvent(connectEvent);
         if (connectEvent.isCancelled()) {
+            api.getProtocolManager().removeUser(channel);
             channel.unsafe().closeForcibly();
             return;
         }
 
-        PacketSide apiSide = PacketEvents.getAPI().getInjector().getPacketSide();
+        PacketSide apiSide = api.getInjector().getPacketSide();
         channel.pipeline().addAfter("splitter", PacketEvents.DECODER_NAME, new PacketDecoder(apiSide, user));
         channel.pipeline().addAfter("prepender", PacketEvents.ENCODER_NAME, new PacketEncoder(apiSide, user));
         channel.closeFuture().addListener((ChannelFutureListener) future ->

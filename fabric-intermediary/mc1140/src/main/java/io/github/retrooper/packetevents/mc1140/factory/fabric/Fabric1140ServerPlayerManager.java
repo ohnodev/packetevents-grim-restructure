@@ -50,6 +50,8 @@ public class Fabric1140ServerPlayerManager extends AbstractFabricPlayerManager {
     public void disconnectPlayer(Object serverPlayer, String message) {
         if (serverPlayer instanceof ServerPlayerEntity spe) {
             spe.networkHandler.disconnect(new TextComponent(message));
+            return;
         }
+        throw new UnsupportedOperationException("Unsupported player implementation: " + serverPlayer);
     }
 }

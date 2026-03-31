@@ -38,6 +38,22 @@ loom {
     }
 }
 
+tasks.named<ProcessResources>("processResources") {
+    inputs.property("version", project.version)
+    inputs.property("modName", "packetevents-${project.name}")
+    inputs.property("minecraft_version", minecraft_version)
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            mapOf(
+                "version" to project.version,
+                "modName" to "packetevents-${project.name}",
+                "minecraft_version" to minecraft_version
+            )
+        )
+    }
+}
+
 allprojects {
     apply(plugin = "fabric-loom")
     apply(plugin = "packetevents.publish-conventions")

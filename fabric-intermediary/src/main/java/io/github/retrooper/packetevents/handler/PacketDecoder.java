@@ -25,14 +25,13 @@ import com.github.retrooper.packetevents.util.PacketEventsImplHelper;
 import io.github.retrooper.packetevents.util.FabricInjectionUtil;
 import io.github.retrooper.packetevents.util.viaversion.ViaVersionUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
-@ApiStatus.Internal @ChannelHandler.Sharable
+@ApiStatus.Internal
 public class PacketDecoder extends MessageToMessageDecoder<ByteBuf> implements PacketEventsChannelHandler {
 
     private final PacketSide side;
