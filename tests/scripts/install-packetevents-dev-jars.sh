@@ -55,27 +55,46 @@ mkdir -p "${MODS_DIR}"
 
 latest_jar() {
   local pattern="$1"
+  local newest=""
+  shopt -s nullglob
+  local matches=( "${BUILD_LIBS}"/${pattern} )
+  shopt -u nullglob
   local file
-  file="$(ls -t ${BUILD_LIBS}/${pattern} 2>/dev/null | head -n 1 || true)"
-  if [[ -z "${file}" ]]; then
+  for file in "${matches[@]}"; do
+    [[ -e "${file}" ]] || continue
+    if [[ -z "${newest}" || "${file}" -nt "${newest}" ]]; then
+      newest="${file}"
+    fi
+  done
+  if [[ -z "${newest}" ]]; then
     return 1
   fi
-  printf '%s\n' "${file}"
+  printf '%s\n' "${newest}"
 }
 
 copy_latest_by_pattern() {
   local pattern="$1"
+  local label="${2:-${pattern}}"
+  local required="${3:-0}"
   local selected
   selected="$(latest_jar "${pattern}" | awk '!/javadoc|sources/' | head -n 1 || true)"
-  if [[ -n "${selected}" ]]; then
-    cp -f "${selected}" "${MODS_DIR}/"
-    echo "  - $(basename "${selected}")"
+  if [[ -z "${selected}" ]]; then
+    if [[ "${required}" == "1" ]]; then
+      echo "[install] Missing required jar: ${label} (pattern: ${pattern})" >&2
+      return 1
+    fi
+    return 0
   fi
+  cp -f "${selected}" "${MODS_DIR}/"
+  echo "  - $(basename "${selected}")"
 }
 
 copy_main_fabric_jar() {
   local selected=""
-  for f in $(ls -t "${BUILD_LIBS}"/packetevents-fabric-*.jar 2>/dev/null); do
+  shopt -s nullglob
+  local f
+  for f in "${BUILD_LIBS}"/packetevents-fabric-*.jar; do
+    [[ -e "${f}" ]] || continue
     local b
     b="$(basename "${f}")"
     if [[ "${b}" == *-sources.jar || "${b}" == *-javadoc.jar ]]; then
@@ -84,11 +103,13 @@ copy_main_fabric_jar() {
     if [[ "${b}" == packetevents-fabric-common-* || "${b}" == packetevents-fabric-intermediary-* || "${b}" == packetevents-fabric-official-* || "${b}" == packetevents-fabric-mc* ]]; then
       continue
     fi
-    selected="${f}"
-    break
+    if [[ -z "${selected}" || "${f}" -nt "${selected}" ]]; then
+      selected="${f}"
+    fi
   done
+  shopt -u nullglob
   if [[ -z "${selected}" ]]; then
-    echo "[install] Missing main packetevents-fabric jar"
+    echo "[install] Missing main packetevents-fabric jar" >&2
     return 1
   fi
   cp -f "${selected}" "${MODS_DIR}/"
@@ -100,7 +121,7 @@ copy_latest_mc_module() {
   local selected
   selected="$(latest_jar "packetevents-fabric-${module}-*.jar" | awk '!/javadoc|sources/' | head -n 1 || true)"
   if [[ -z "${selected}" ]]; then
-    echo "[install] Missing module jar for ${module}"
+    echo "[install] Missing module jar for ${module}" >&2
     return 1
   fi
   cp -f "${selected}" "${MODS_DIR}/"
@@ -114,15 +135,15 @@ echo "[install] Installing PacketEvents jars for profile: ${PROFILE}"
 case "${PROFILE}" in
   intermediary-1194)
     copy_main_fabric_jar
-    copy_latest_by_pattern "packetevents-fabric-common-*.jar"
-    copy_latest_by_pattern "packetevents-fabric-intermediary-*.jar"
+    copy_latest_by_pattern "packetevents-fabric-common-*.jar" "fabric-common"
+    copy_latest_by_pattern "packetevents-fabric-intermediary-*.jar" "fabric-intermediary" 1
     copy_latest_mc_module "mc1140"
     copy_latest_mc_module "mc1194"
     ;;
   intermediary-1216)
     copy_main_fabric_jar
-    copy_latest_by_pattern "packetevents-fabric-common-*.jar"
-    copy_latest_by_pattern "packetevents-fabric-intermediary-*.jar"
+    copy_latest_by_pattern "packetevents-fabric-common-*.jar" "fabric-common"
+    copy_latest_by_pattern "packetevents-fabric-intermediary-*.jar" "fabric-intermediary" 1
     copy_latest_mc_module "mc1140"
     copy_latest_mc_module "mc1194"
     copy_latest_mc_module "mc1202"
@@ -132,8 +153,8 @@ case "${PROFILE}" in
     ;;
   official-261)
     copy_main_fabric_jar
-    copy_latest_by_pattern "packetevents-fabric-common-*.jar"
-    copy_latest_by_pattern "packetevents-fabric-official-*.jar"
+    copy_latest_by_pattern "packetevents-fabric-common-*.jar" "fabric-common"
+    copy_latest_by_pattern "packetevents-fabric-official-*.jar" "fabric-official" 1
     ;;
   *)
     echo "Unknown profile: ${PROFILE}"

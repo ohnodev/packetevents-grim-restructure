@@ -12,6 +12,7 @@ import com.github.retrooper.packetevents.util.PacketEventsImplHelper;
 import io.github.retrooper.packetevents.handler.PacketDecoder;
 import io.github.retrooper.packetevents.handler.PacketEncoder;
 import io.github.retrooper.packetevents.util.FabricUtil;
+import io.github.retrooper.packetevents.util.viaversion.ViaVersionUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelPipeline;
@@ -69,6 +70,21 @@ public class ConnectionMixin {
         PacketSide apiSide = api.getInjector().getPacketSide();
         channel.pipeline().addAfter("splitter", PacketEvents.DECODER_NAME, new PacketDecoder(apiSide, user));
         channel.pipeline().addAfter("prepender", PacketEvents.ENCODER_NAME, new PacketEncoder(apiSide, user));
+
+        if (api.getSettings().isPreViaInjection() && ViaVersionUtil.isAvailable(user)) {
+            String preDecoderName = "pre-" + PacketEvents.DECODER_NAME;
+            String preEncoderName = "pre-" + PacketEvents.ENCODER_NAME;
+            if (channel.pipeline().get("via-decoder") != null) {
+                channel.pipeline().addBefore("via-decoder", preDecoderName, new PacketDecoder(apiSide, user, true));
+            } else {
+                channel.pipeline().addAfter("splitter", preDecoderName, new PacketDecoder(apiSide, user, true));
+            }
+            if (channel.pipeline().get("via-encoder") != null) {
+                channel.pipeline().addBefore("via-encoder", preEncoderName, new PacketEncoder(apiSide, user, true));
+            } else {
+                channel.pipeline().addAfter("prepender", preEncoderName, new PacketEncoder(apiSide, user, true));
+            }
+        }
         channel.closeFuture().addListener((ChannelFutureListener) future ->
                 PacketEventsImplHelper.handleDisconnection(user.getChannel(), user.getUUID()));
     }

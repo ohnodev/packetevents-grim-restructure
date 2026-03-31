@@ -16,8 +16,8 @@ import java.util.List;
 public class PacketDecoder extends MessageToMessageDecoder<ByteBuf> implements PacketEventsChannelHandler {
 
     private final PacketSide side;
-    private User user;
-    private Object player;
+    private volatile User user;
+    private volatile Object player;
     private final boolean preViaVersion;
 
     public PacketDecoder(PacketSide side, User user, boolean preViaVersion) {

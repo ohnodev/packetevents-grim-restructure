@@ -4,6 +4,7 @@ import net.fabricmc.loom.task.RemapSourcesJarTask
 plugins {
     packetevents.`library-conventions`
     packetevents.`publish-conventions`
+    // Root aggregate project uses remap tasks while subprojects apply full fabric-loom below.
     net.fabricmc.`fabric-loom-remap`
 }
 
@@ -55,6 +56,7 @@ tasks.named<ProcessResources>("processResources") {
 }
 
 allprojects {
+    // Subprojects (mc1140, mc1194, ...) need full fabric-loom for mappings/mod tasks.
     apply(plugin = "fabric-loom")
     apply(plugin = "packetevents.publish-conventions")
 
@@ -69,9 +71,7 @@ allprojects {
     tasks {
         withType<JavaCompile> {
             val targetJavaVersion = 17
-            if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
-                options.release = targetJavaVersion
-            }
+            options.release = targetJavaVersion
         }
 
         named<RemapJarTask>("remapJar") {
@@ -91,10 +91,10 @@ allprojects {
             useLegacyMixinAp.set(false)
         }
 
-        val accessWidenerFile = the<SourceSetContainer>()["main"].resources.srcDirs.first()
-            .resolve("${rootProject.name}.accesswidener")
+        val resourceDir = the<SourceSetContainer>()["main"].resources.srcDirs.firstOrNull()
+        val accessWidenerFile = resourceDir?.resolve("${rootProject.name}.accesswidener")
 
-        if (accessWidenerFile.exists()) {
+        if (accessWidenerFile != null && accessWidenerFile.exists()) {
             accessWidenerPath.set(accessWidenerFile)
         }
     }

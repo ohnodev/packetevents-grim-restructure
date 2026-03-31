@@ -44,7 +44,17 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
 echo "[bootstrap:${CASE_NAME}] Building Fabric artifacts..."
-./gradlew :fabric:build
+case "${PROFILE}" in
+  intermediary-*)
+    ./gradlew :fabric:build :fabric-intermediary:build
+    ;;
+  official-261)
+    ./gradlew :fabric:build :fabric-official:build
+    ;;
+  *)
+    ./gradlew :fabric:build
+    ;;
+esac
 
 echo "[bootstrap:${CASE_NAME}] Setting up server ${MC_VERSION}..."
 "${SCRIPT_DIR}/setup-fabric-server.sh" \
