@@ -1,0 +1,67 @@
+package io.github.retrooper.packetevents.mixin;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.UserConnectEvent;
+import com.github.retrooper.packetevents.protocol.ConnectionState;
+import com.github.retrooper.packetevents.protocol.PacketSide;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
+import com.github.retrooper.packetevents.protocol.player.User;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
+import com.github.retrooper.packetevents.util.PacketEventsImplHelper;
+import io.github.retrooper.packetevents.handler.PacketDecoder;
+import io.github.retrooper.packetevents.handler.PacketEncoder;
+import io.github.retrooper.packetevents.util.FabricUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelPipeline;
+import net.minecraft.SharedConstants;
+import net.minecraft.network.BandwidthDebugMonitor;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(Connection.class)
+public class ConnectionMixin {
+
+    @Unique
+    private static final ClientVersion CLIENT_VERSION =
+            ClientVersion.getById(SharedConstants.getProtocolVersion());
+
+    @Inject(
+            method = "configureSerialization",
+            at = @At("TAIL")
+    )
+    private static void configureSerialization(
+            ChannelPipeline pipeline, PacketFlow flow, boolean memoryOnly,
+            BandwidthDebugMonitor bandwidthDebugMonitor, CallbackInfo ci
+    ) {
+        if (!FabricUtil.isOurConnection(flow)) {
+            PacketEvents.getAPI().getLogManager().debug("Skipped pipeline injection on " + flow);
+            return;
+        }
+
+        PacketEvents.getAPI().getLogManager().debug("Game connected!");
+
+        Channel channel = pipeline.channel();
+        User user = new User(channel, ConnectionState.HANDSHAKING,
+                CLIENT_VERSION, new UserProfile(null, null));
+        PacketEvents.getAPI().getProtocolManager().setUser(channel, user);
+
+        UserConnectEvent connectEvent = new UserConnectEvent(user);
+        PacketEvents.getAPI().getEventManager().callEvent(connectEvent);
+        if (connectEvent.isCancelled()) {
+            channel.unsafe().closeForcibly();
+            return;
+        }
+
+        PacketSide apiSide = PacketEvents.getAPI().getInjector().getPacketSide();
+        channel.pipeline().addAfter("splitter", PacketEvents.DECODER_NAME, new PacketDecoder(apiSide, user));
+        channel.pipeline().addAfter("prepender", PacketEvents.ENCODER_NAME, new PacketEncoder(apiSide, user));
+        channel.closeFuture().addListener((ChannelFutureListener) future ->
+                PacketEventsImplHelper.handleDisconnection(user.getChannel(), user.getUUID()));
+    }
+}
