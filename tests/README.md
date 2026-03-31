@@ -32,6 +32,20 @@ What this does:
 3. Installs matching jar sets per path
 4. Starts each server briefly (timeout smoke run)
 
+## Bukkit Startup Harnesses (Paper + Spigot)
+
+From repository root:
+
+```bash
+./tests/scripts/run-all-bukkit-harnesses.sh
+```
+
+What this does:
+1. Builds the Spigot plugin artifact (`:spigot:build`)
+2. Sets up a Paper 1.21.1 server and installs PacketEvents
+3. Sets up a Spigot 1.21.1 server (via BuildTools) and installs PacketEvents
+4. Starts each server briefly and asserts startup reaches `Done (...)`
+
 ## Individual Harnesses
 
 ### 1) Intermediary 1.19.4
@@ -90,6 +104,27 @@ Requires Java 25 runtime for server launch:
 
 - `tests/scripts/run-all-harnesses.sh`
   - Runs all three harnesses with a timed startup smoke check.
+
+- `tests/scripts/bootstrap-paper.sh`
+  - End-to-end setup for Paper plugin startup validation.
+
+- `tests/scripts/bootstrap-spigot.sh`
+  - End-to-end setup for Spigot plugin startup validation.
+
+- `tests/scripts/setup-paper-server.sh`
+  - Downloads a Paper server jar for the target MC version.
+
+- `tests/scripts/setup-spigot-server.sh`
+  - Uses Spigot BuildTools to produce a Spigot server jar for the target MC version.
+
+- `tests/scripts/install-packetevents-bukkit-dev-jar.sh`
+  - Copies the newest local `packetevents-spigot-*.jar` to a Bukkit `plugins/` folder.
+
+- `tests/scripts/run-bukkit-server.sh`
+  - Starts a Paper/Spigot server with `nogui`.
+
+- `tests/scripts/run-all-bukkit-harnesses.sh`
+  - Runs Paper and Spigot startup smoke harnesses.
 
 ## Reproducibility Notes
 
