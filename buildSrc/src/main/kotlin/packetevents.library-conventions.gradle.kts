@@ -204,20 +204,22 @@ publishing {
         }
     }
 
+    // Only register the maven repo when all credentials are present;
+    // skipping this entirely avoids Gradle registering an empty repo
+    // that breaks ./gradlew publish in CI without MAVEN_* secrets.
     repositories {
-        maven {
-            val snapshotUrl = getEnvVar("MAVEN_SNAPSHOT_URL") ?: return@maven
-            val releaseUrl = getEnvVar("MAVEN_RELEASE_URL") ?: return@maven
+        val snapshotUrl = getEnvVar("MAVEN_SNAPSHOT_URL")
+        val releaseUrl = getEnvVar("MAVEN_RELEASE_URL")
+        val mavenUsername = getEnvVar("MAVEN_USERNAME")
+        val mavenPassword = getEnvVar("MAVEN_PASSWORD")
 
-            // Check which URL should be used
-            url = uri(if ((version as String).endsWith("SNAPSHOT")) snapshotUrl else releaseUrl)
-
-            val mavenUsername = getEnvVar("MAVEN_USERNAME") ?: return@maven
-            val mavenPassword = getEnvVar("MAVEN_PASSWORD") ?: return@maven
-
-            credentials {
-                username = mavenUsername
-                password = mavenPassword
+        if (snapshotUrl != null && releaseUrl != null && mavenUsername != null && mavenPassword != null) {
+            maven {
+                url = uri(if ((version as String).endsWith("SNAPSHOT")) snapshotUrl else releaseUrl)
+                credentials {
+                    username = mavenUsername
+                    password = mavenPassword
+                }
             }
         }
     }
