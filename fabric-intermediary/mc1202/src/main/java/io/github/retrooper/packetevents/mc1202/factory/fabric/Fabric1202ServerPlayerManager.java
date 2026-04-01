@@ -49,8 +49,7 @@ public class Fabric1202ServerPlayerManager extends Fabric1140ServerPlayerManager
     // disconnect method moved from ServerPlayNetworkHandler -> ServerCommonNetworkHandler in 1.20.2
     @Override
     public void disconnectPlayer(Object serverPlayer, String message) {
-        if (serverPlayer instanceof ServerPlayerEntity spe) {
-            spe.networkHandler.disconnect(Text.literal(message));
-        }
+        ServerPlayerEntity spe = (ServerPlayerEntity) serverPlayer;
+        spe.networkHandler.disconnect(Text.literal(message));
     }
 }

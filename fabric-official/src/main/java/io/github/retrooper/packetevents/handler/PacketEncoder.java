@@ -16,6 +16,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDi
 import io.github.retrooper.packetevents.factory.fabric.FabricPacketEventsAPI;
 import io.github.retrooper.packetevents.util.viaversion.ViaVersionUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
+@ChannelHandler.Sharable
 public class PacketEncoder extends ChannelOutboundHandlerAdapter implements PacketEventsChannelHandler {
 
     private static final boolean NETTY_4_1_0;
@@ -39,8 +41,8 @@ public class PacketEncoder extends ChannelOutboundHandlerAdapter implements Pack
     }
 
     private final PacketSide side;
-    private User user;
-    private Object player;
+    public volatile User user;
+    public volatile Object player;
     private ChannelPromise promise;
     private final boolean preViaVersion;
 

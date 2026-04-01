@@ -44,21 +44,23 @@ public class FabricChannelInjector implements ChannelInjector {
 
     @Override
     public void inject() {
+        // NO-OP
     }
 
     @Override
     public void uninject() {
+        // NO-OP
     }
 
     @Override
     public boolean isPlayerSet(Object ch) {
         if (ch == null) return false;
         Channel channel = (Channel) ch;
-        Object encoder = channel.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder && packetEncoder.getPlayer() != null) return true;
+        PacketEventsChannelHandler encoder = (PacketEventsChannelHandler) channel.pipeline().get(ENCODER_NAME);
+        if (encoder.getPlayer() != null) return true;
 
-        Object decoder = channel.pipeline().get(DECODER_NAME);
-        return decoder instanceof PacketEventsChannelHandler packetDecoder && packetDecoder.getPlayer() != null;
+        PacketEventsChannelHandler decoder = (PacketEventsChannelHandler) channel.pipeline().get(DECODER_NAME);
+        return decoder.getPlayer() != null;
     }
 
     @Override
@@ -67,15 +69,11 @@ public class FabricChannelInjector implements ChannelInjector {
             return;
         }
         Channel ch = (Channel) channel;
-        Object decoder = ch.pipeline().get(DECODER_NAME);
-        if (decoder instanceof PacketEventsChannelHandler packetDecoder) {
-            packetDecoder.setUser(user);
-        }
+        PacketEventsChannelHandler decoder = (PacketEventsChannelHandler) ch.pipeline().get(DECODER_NAME);
+        decoder.setUser(user);
 
-        Object encoder = ch.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder) {
-            packetEncoder.setUser(user);
-        }
+        PacketEventsChannelHandler encoder = (PacketEventsChannelHandler) ch.pipeline().get(ENCODER_NAME);
+        encoder.setUser(user);
     }
 
     @Override
@@ -84,15 +82,11 @@ public class FabricChannelInjector implements ChannelInjector {
             return;
         }
         Channel ch = (Channel) channel;
-        Object decoder = ch.pipeline().get(DECODER_NAME);
-        if (decoder instanceof PacketEventsChannelHandler packetDecoder) {
-            packetDecoder.setPlayer(player);
-        }
+        PacketEventsChannelHandler decoder = (PacketEventsChannelHandler) ch.pipeline().get(DECODER_NAME);
+        decoder.setPlayer(player);
 
-        Object encoder = ch.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder) {
-            packetEncoder.setPlayer(player);
-        }
+        PacketEventsChannelHandler encoder = (PacketEventsChannelHandler) ch.pipeline().get(ENCODER_NAME);
+        encoder.setPlayer(player);
     }
 
     @Override

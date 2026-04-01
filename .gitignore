@@ -2,15 +2,6 @@
 /.idea
 .env
 
-# BuildTools working files (Spigot harness)
-/BuildData/
-/Bukkit/
-/CraftBukkit/
-/Spigot/
-/work/
-/apache-maven-*/
-/BuildTools.log.txt
-
 *.iml
 *.ipr
 *.iws

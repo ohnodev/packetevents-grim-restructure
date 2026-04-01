@@ -31,11 +31,7 @@ if (envFile.exists()) envFile.reader(Charsets.UTF_8).use { reader ->
 }
 
 fun getEnvVar(name: String): String? {
-    val rawEnv = System.getenv(name)
-    if (rawEnv != null && rawEnv.trim().isNotEmpty()) {
-        return rawEnv.trim()
-    }
-    return envProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
+    return System.getenv(name) ?: envProperties.getProperty(name)
 }
 
 fun getCurrentGitBranchName(): String {
@@ -207,20 +203,19 @@ publishing {
     }
 
     repositories {
-        val snapshotUrl = getEnvVar("MAVEN_SNAPSHOT_URL")
-        val releaseUrl = getEnvVar("MAVEN_RELEASE_URL")
-        val mavenUsername = getEnvVar("MAVEN_USERNAME")
-        val mavenPassword = getEnvVar("MAVEN_PASSWORD")
+        maven {
+            val snapshotUrl = getEnvVar("MAVEN_SNAPSHOT_URL") ?: return@maven
+            val releaseUrl = getEnvVar("MAVEN_RELEASE_URL") ?: return@maven
 
-        if (snapshotUrl != null && releaseUrl != null && mavenUsername != null && mavenPassword != null) {
-            maven {
-                // Check which URL should be used
-                url = uri(if ((version as String).endsWith("SNAPSHOT")) snapshotUrl else releaseUrl)
+            // Check which URL should be used
+            url = uri(if ((version as String).endsWith("SNAPSHOT")) snapshotUrl else releaseUrl)
 
-                credentials {
-                    username = mavenUsername
-                    password = mavenPassword
-                }
+            val mavenUsername = getEnvVar("MAVEN_USERNAME") ?: return@maven
+            val mavenPassword = getEnvVar("MAVEN_PASSWORD") ?: return@maven
+
+            credentials {
+                username = mavenUsername
+                password = mavenPassword
             }
         }
     }
