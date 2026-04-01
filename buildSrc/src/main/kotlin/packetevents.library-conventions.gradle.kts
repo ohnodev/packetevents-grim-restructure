@@ -30,12 +30,10 @@ if (envFile.exists()) envFile.reader(Charsets.UTF_8).use { reader ->
     envProperties.load(reader)
 }
 
+// Treat empty env vars as absent so the ?: return@maven guards in publishing
+// skip the maven repo block in CI where MAVEN_* vars are set but empty.
 fun getEnvVar(name: String): String? {
-    val rawEnv = System.getenv(name)
-    if (rawEnv != null && rawEnv.trim().isNotEmpty()) {
-        return rawEnv.trim()
-    }
-    return envProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
+    return System.getenv(name)?.ifEmpty { null } ?: envProperties.getProperty(name)?.ifEmpty { null }
 }
 
 fun getCurrentGitBranchName(): String {
@@ -206,6 +204,9 @@ publishing {
         }
     }
 
+    // Only register the maven repo when all credentials are present;
+    // skipping this entirely avoids Gradle registering an empty repo
+    // that breaks ./gradlew publish in CI without MAVEN_* secrets.
     repositories {
         val snapshotUrl = getEnvVar("MAVEN_SNAPSHOT_URL")
         val releaseUrl = getEnvVar("MAVEN_RELEASE_URL")
@@ -214,9 +215,7 @@ publishing {
 
         if (snapshotUrl != null && releaseUrl != null && mavenUsername != null && mavenPassword != null) {
             maven {
-                // Check which URL should be used
                 url = uri(if ((version as String).endsWith("SNAPSHOT")) snapshotUrl else releaseUrl)
-
                 credentials {
                     username = mavenUsername
                     password = mavenPassword

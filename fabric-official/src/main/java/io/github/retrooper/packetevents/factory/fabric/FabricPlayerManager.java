@@ -13,26 +13,16 @@ public class FabricPlayerManager extends AbstractFabricPlayerManager {
 
     @Override
     public int getPing(@NotNull Object player) {
-        if (player instanceof ServerPlayer sp) {
-            return sp.connection.latency();
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayer) player).connection.latency();
     }
 
     @Override
     public Object getChannel(@NotNull Object player) {
-        if (player instanceof ServerPlayer sp) {
-            return sp.connection.connection.channel;
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayer) player).connection.connection.channel;
     }
 
     @Override
     public void disconnectPlayer(Object serverPlayer, String message) {
-        if (serverPlayer instanceof ServerPlayer sp) {
-            sp.connection.disconnect(Component.literal(message));
-            return;
-        }
-        throw new UnsupportedOperationException("disconnectPlayer only supports ServerPlayer: " + serverPlayer);
+        ((ServerPlayer) serverPlayer).connection.disconnect(Component.literal(message));
     }
 }

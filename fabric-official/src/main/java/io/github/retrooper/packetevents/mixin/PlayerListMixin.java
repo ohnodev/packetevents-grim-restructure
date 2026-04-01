@@ -1,14 +1,9 @@
 package io.github.retrooper.packetevents.mixin;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.PacketEventsAPI;
-import com.github.retrooper.packetevents.event.UserLoginEvent;
-import com.github.retrooper.packetevents.protocol.player.User;
-import com.github.retrooper.packetevents.util.FakeChannelUtil;
+import io.github.retrooper.packetevents.util.FabricInjectionUtil;
 import io.github.retrooper.packetevents.util.FabricUtil;
-import io.netty.channel.Channel;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
@@ -49,20 +44,7 @@ public class PlayerListMixin {
         if (!FabricUtil.isOurConnection(connection)) {
             return;
         }
-
-        PacketEventsAPI<?> api = PacketEvents.getAPI();
-        User user = api.getPlayerManager().getUser(player);
-        if (user == null) {
-            Object channelObj = api.getPlayerManager().getChannel(player);
-
-            if (!FakeChannelUtil.isFakeChannel(channelObj) &&
-                    (!api.isTerminated() || api.getSettings().isKickIfTerminated())) {
-                player.connection.disconnect(Component.literal("PacketEvents failed to inject into a channel."));
-            }
-            return;
-        }
-
-        api.getEventManager().callEvent(new UserLoginEvent(user, player));
+        FabricInjectionUtil.fireUserLoginEvent(player);
     }
 
     @Inject(
@@ -72,8 +54,7 @@ public class PlayerListMixin {
     private void postRespawn(CallbackInfoReturnable<ServerPlayer> cir) {
         ServerPlayer player = cir.getReturnValue();
         if (FabricUtil.isOurConnection(player.connection.connection)) {
-            Channel channel = player.connection.connection.channel;
-            PacketEvents.getAPI().getInjector().setPlayer(channel, player);
+            PacketEvents.getAPI().getInjector().setPlayer(player.connection.connection.channel, player);
         }
     }
 }

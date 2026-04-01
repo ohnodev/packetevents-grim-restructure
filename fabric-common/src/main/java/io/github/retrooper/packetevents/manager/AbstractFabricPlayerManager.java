@@ -79,4 +79,12 @@ public abstract class AbstractFabricPlayerManager extends PlayerManagerAbstract 
     }
 
     public abstract void disconnectPlayer(Object serverPlayer, String message);
+
+    /**
+     * Kick a player due to a packet processing exception.
+     * Mapping-specific implementations should override to execute via the server's main thread.
+     */
+    public void kickOnException(Object player, String message) {
+        disconnectPlayer(player, message);
+    }
 }

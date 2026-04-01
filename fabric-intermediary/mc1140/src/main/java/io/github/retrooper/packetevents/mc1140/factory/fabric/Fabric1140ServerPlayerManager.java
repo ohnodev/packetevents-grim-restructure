@@ -32,26 +32,22 @@ public class Fabric1140ServerPlayerManager extends AbstractFabricPlayerManager {
 
     @Override
     public int getPing(@NotNull Object player) {
-        if (player instanceof ServerPlayerEntity) {
-            return ((ServerPlayerEntity) player).field_13967; // pingMilliseconds in modern yarn
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayerEntity) player).field_13967; // pingMilliseconds in modern yarn
     }
 
     @Override
     public Object getChannel(@NotNull Object player) {
-        if (player instanceof ServerPlayerEntity) {
-            return ((ServerPlayerEntity) player).networkHandler.client.channel;
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayerEntity) player).networkHandler.client.channel;
     }
 
     @Override
     public void disconnectPlayer(Object serverPlayer, String message) {
-        if (serverPlayer instanceof ServerPlayerEntity spe) {
-            spe.networkHandler.disconnect(new TextComponent(message));
-            return;
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + serverPlayer);
+        ((ServerPlayerEntity) serverPlayer).networkHandler.disconnect(new TextComponent(message));
+    }
+
+    @Override
+    public void kickOnException(Object player, String message) {
+        ServerPlayerEntity spe = (ServerPlayerEntity) player;
+        spe.getServer().execute(() -> disconnectPlayer(spe, message));
     }
 }
