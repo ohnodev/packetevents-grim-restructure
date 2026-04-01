@@ -30,6 +30,8 @@ if (envFile.exists()) envFile.reader(Charsets.UTF_8).use { reader ->
     envProperties.load(reader)
 }
 
+// Treat empty env vars as absent so the ?: return@maven guards in publishing
+// skip the maven repo block in CI where MAVEN_* vars are set but empty.
 fun getEnvVar(name: String): String? {
     return System.getenv(name)?.ifEmpty { null } ?: envProperties.getProperty(name)?.ifEmpty { null }
 }
