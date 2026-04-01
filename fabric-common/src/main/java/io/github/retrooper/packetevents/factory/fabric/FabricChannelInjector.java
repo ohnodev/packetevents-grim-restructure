@@ -22,7 +22,8 @@ import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.github.retrooper.packetevents.injector.ChannelInjector;
 import com.github.retrooper.packetevents.protocol.PacketSide;
 import com.github.retrooper.packetevents.protocol.player.User;
-import io.github.retrooper.packetevents.handler.PacketEventsChannelHandler;
+import io.github.retrooper.packetevents.handler.PacketDecoder;
+import io.github.retrooper.packetevents.handler.PacketEncoder;
 import io.netty.channel.Channel;
 import net.fabricmc.api.EnvType;
 
@@ -44,55 +45,43 @@ public class FabricChannelInjector implements ChannelInjector {
 
     @Override
     public void inject() {
+        // NO-OP
     }
 
     @Override
     public void uninject() {
+        // NO-OP
     }
 
     @Override
     public boolean isPlayerSet(Object ch) {
         if (ch == null) return false;
         Channel channel = (Channel) ch;
-        Object encoder = channel.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder && packetEncoder.getPlayer() != null) return true;
+        PacketEncoder encoder = (PacketEncoder) channel.pipeline().get(ENCODER_NAME);
+        if (encoder.player != null) return true;
 
-        Object decoder = channel.pipeline().get(DECODER_NAME);
-        return decoder instanceof PacketEventsChannelHandler packetDecoder && packetDecoder.getPlayer() != null;
+        PacketDecoder decoder = (PacketDecoder) channel.pipeline().get(DECODER_NAME);
+        return decoder.player != null;
     }
 
     @Override
     public void updateUser(Object channel, User user) {
         if (!packetEventsAPI.getProtocolManager().hasChannel(channel)) {
-            return;
+            return; // this channel isn't injected by packetevents
         }
         Channel ch = (Channel) channel;
-        Object decoder = ch.pipeline().get(DECODER_NAME);
-        if (decoder instanceof PacketEventsChannelHandler packetDecoder) {
-            packetDecoder.setUser(user);
-        }
-
-        Object encoder = ch.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder) {
-            packetEncoder.setUser(user);
-        }
+        ((PacketDecoder) ch.pipeline().get(DECODER_NAME)).user = user;
+        ((PacketEncoder) ch.pipeline().get(ENCODER_NAME)).user = user;
     }
 
     @Override
     public void setPlayer(Object channel, Object player) {
         if (!packetEventsAPI.getProtocolManager().hasChannel(channel)) {
-            return;
+            return; // this channel isn't injected by packetevents
         }
         Channel ch = (Channel) channel;
-        Object decoder = ch.pipeline().get(DECODER_NAME);
-        if (decoder instanceof PacketEventsChannelHandler packetDecoder) {
-            packetDecoder.setPlayer(player);
-        }
-
-        Object encoder = ch.pipeline().get(ENCODER_NAME);
-        if (encoder instanceof PacketEventsChannelHandler packetEncoder) {
-            packetEncoder.setPlayer(player);
-        }
+        ((PacketDecoder) ch.pipeline().get(DECODER_NAME)).player = player;
+        ((PacketEncoder) ch.pipeline().get(ENCODER_NAME)).player = player;
     }
 
     @Override

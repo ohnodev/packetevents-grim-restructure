@@ -32,25 +32,17 @@ public class Fabric1202ServerPlayerManager extends Fabric1140ServerPlayerManager
 
     @Override
     public int getPing(@NotNull Object player) {
-        if (player instanceof ServerPlayerEntity) {
-            return ((ServerPlayerEntity) player).networkHandler.getLatency();
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayerEntity) player).networkHandler.getLatency();
     }
 
     @Override
     public Object getChannel(@NotNull Object player) {
-        if (player instanceof ServerPlayerEntity) {
-            return ((ServerPlayerEntity) player).networkHandler.connection.channel;
-        }
-        throw new UnsupportedOperationException("Unsupported player implementation: " + player);
+        return ((ServerPlayerEntity) player).networkHandler.connection.channel;
     }
 
     // disconnect method moved from ServerPlayNetworkHandler -> ServerCommonNetworkHandler in 1.20.2
     @Override
     public void disconnectPlayer(Object serverPlayer, String message) {
-        if (serverPlayer instanceof ServerPlayerEntity spe) {
-            spe.networkHandler.disconnect(Text.literal(message));
-        }
+        ((ServerPlayerEntity) serverPlayer).networkHandler.disconnect(Text.literal(message));
     }
 }
