@@ -31,7 +31,7 @@ if (envFile.exists()) envFile.reader(Charsets.UTF_8).use { reader ->
 }
 
 fun getEnvVar(name: String): String? {
-    return System.getenv(name) ?: envProperties.getProperty(name)
+    return System.getenv(name)?.ifEmpty { null } ?: envProperties.getProperty(name)?.ifEmpty { null }
 }
 
 fun getCurrentGitBranchName(): String {
