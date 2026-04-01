@@ -25,10 +25,4 @@ public class FabricPlayerManager extends AbstractFabricPlayerManager {
     public void disconnectPlayer(Object serverPlayer, String message) {
         ((ServerPlayer) serverPlayer).connection.disconnect(Component.literal(message));
     }
-
-    @Override
-    public void kickOnException(Object player, String message) {
-        ServerPlayer sp = (ServerPlayer) player;
-        sp.getServer().execute(() -> disconnectPlayer(sp, message));
-    }
 }
